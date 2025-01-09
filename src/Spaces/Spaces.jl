@@ -19,6 +19,7 @@ using Adapt
 
 import ..slab, ..column, ..level
 import ..Utilities: PlusHalf, half
+import ..DebugOnly: call_post_op_callback, post_op_callback
 import ..DataLayouts,
     ..Geometry, ..Domains, ..Meshes, ..Topologies, ..Grids, ..Quadratures
 
@@ -80,10 +81,6 @@ global_geometry(space::AbstractSpace) = global_geometry(grid(space))
 space(refspace::AbstractSpace, staggering::Staggering) =
     space(grid(refspace), staggering)
 
-
-
-
-
 issubspace(::AbstractSpace, ::AbstractSpace) = false
 
 undertype(space::AbstractSpace) =
@@ -102,6 +99,14 @@ include("extruded.jl")
 include("triangulation.jl")
 include("dss.jl")
 
+
+function center_space(space::AbstractSpace)
+    error("`center_space` can only be called with vertical/extruded spaces")
+end
+
+function face_space(space::AbstractSpace)
+    error("`center_space` can only be called with vertical/extruded spaces")
+end
 
 weighted_jacobian(space::Spaces.AbstractSpace) = local_geometry_data(space).WJ
 

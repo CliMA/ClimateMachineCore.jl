@@ -9,6 +9,7 @@ import CUDA
 using CUDA
 using CUDA: threadIdx, blockIdx, blockDim
 import StaticArrays: SVector, SMatrix, SArray
+import ClimaCore.DebugOnly: call_post_op_callback, post_op_callback
 import ClimaCore.DataLayouts: mapreduce_cuda
 import ClimaCore.DataLayouts: ToCUDA
 import ClimaCore.DataLayouts: slab, column
@@ -19,6 +20,7 @@ import ClimaCore.RecursiveApply:
 import ClimaCore.DataLayouts: get_N, get_Nv, get_Nij, get_Nij, get_Nh
 import ClimaCore.DataLayouts: UniversalSize
 
+include(joinpath("cuda", "adapt.jl"))
 include(joinpath("cuda", "cuda_utils.jl"))
 include(joinpath("cuda", "data_layouts.jl"))
 include(joinpath("cuda", "fields.jl"))

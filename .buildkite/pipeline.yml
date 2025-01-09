@@ -490,6 +490,8 @@ steps:
           - "julia --color=yes --check-bounds=yes --project=.buildkite test/Fields/benchmark_field_multi_broadcast_fusion.jl"
           - "julia --color=yes --check-bounds=yes --project=.buildkite test/Fields/convergence_field_integrals.jl"
           - "julia --color=yes --check-bounds=yes --project=.buildkite test/Fields/inference_repro.jl"
+        agents:
+          slurm_mem: 20GB
 
       - label: "Unit: field cuda"
         key: unit_field_cuda
@@ -1146,35 +1148,39 @@ steps:
 
       - label: "Unit: spectralelement2d"
         key: unit_spectralelement2d
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/spectralelement2d.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_spectralelement2d.jl"
 
       - label: "Unit: hybrid2dbox"
         key: unit_hybrid2dbox
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid2dbox.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid2dbox.jl"
 
       - label: "Unit: hybrid2dbox topography"
         key: unit_hybrid2dbox_topography
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid2dbox_topography.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid2dbox_topography.jl"
 
       - label: "Unit: hybrid2dbox stretched"
         key: unit_hybrid2dbox_stretched
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid2dbox_stretched.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid2dbox_stretched.jl"
 
       - label: "Unit: hybrid3dbox"
         key: unit_hybrid3dbox
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid3dbox.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid3dbox.jl"
 
       - label: "Unit: hybrid3dcubedsphere"
         key: unit_hybrid3dcubedsphere
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid3dcubedsphere.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid3dcubedsphere.jl"
 
       - label: "Unit: hybrid3dcubedsphere topography"
         key: unit_hybrid3dcubedsphere_topography
-        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid3dcubedsphere_topography.jl"
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid3dcubedsphere_topography.jl"
+
+      - label: "Unit: finitedifference"
+        key: unit_finitedifference
+        command: "julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_finitedifference.jl"
 
       - label: "Unit: Parallel HDF5 IO tests"
         key: "cpu_parallel_hdf5"
-        command: "srun julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/hybrid3dcubedsphere.jl"
+        command: "srun julia --color=yes --check-bounds=yes --project=.buildkite test/InputOutput/unit_hybrid3dcubedsphere.jl"
         timeout_in_minutes: 5
         env:
           CLIMACOMMS_CONTEXT: "MPI"
@@ -1450,6 +1456,31 @@ steps:
           - "julia --color=yes --project=.buildkite examples/column/fct_advection.jl"
         artifact_paths:
           - "examples/column/output/fct_advection/*"
+
+      - label: ":computer: Column TVD Slope-limited Advection Eq"
+        key: "cpu_tvd_column_advect"
+        command:
+          - "julia --color=yes --project=.buildkite examples/column/tvd_advection.jl"
+        artifact_paths:
+          - "examples/column/output/tvd_advection/*"
+
+      - label: ":computer: Column Lin vanLeer Limiter Advection Eq"
+        key: "cpu_lvl_column_advect"
+        command:
+          - "julia --color=yes --project=.buildkite examples/column/vanleer_advection.jl"
+        artifact_paths:
+          - "examples/column/output/vanleer_advection/*"
+
+      - label: ":computer: Column Lin vanLeer Limiter Advection Eq cuda"
+        key: "gpu_lvl_column_advect"
+        command:
+          - "julia --color=yes --project=.buildkite examples/column/vanleer_advection.jl"
+        artifact_paths:
+          - "examples/column/output/vanleer_advection/*"
+        env:
+          CLIMACOMMS_DEVICE: "CUDA"
+        agents:
+          slurm_gpus: 1
 
       - label: ":computer: Column BB FCT Advection Eq"
         key: "cpu_bb_fct_column_advect"

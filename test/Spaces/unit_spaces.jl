@@ -112,6 +112,12 @@ on_gpu || @testset "extruded (2d 1×3) finite difference space" begin
     # Extrusion
     f_space = Spaces.ExtrudedFiniteDifferenceSpace(hspace, vert_face_space)
     c_space = Spaces.CenterExtrudedFiniteDifferenceSpace(f_space)
+
+    @test f_space == Spaces.face_space(f_space)
+    @test c_space == Spaces.center_space(f_space)
+    @test f_space == Spaces.face_space(c_space)
+    @test c_space == Spaces.center_space(c_space)
+
     s = DataLayouts.farray_size(Spaces.coordinates_data(c_space))
     z = Fields.coordinate_field(c_space).z
     @test s == (10, 4, 2, 5) # 10V, 4I, 2F(x,z), 5H
@@ -145,19 +151,25 @@ end
     mesh = Meshes.IntervalMesh(domain; nelems = 1)
     topology = Topologies.IntervalTopology(context, mesh)
 
-    space = Spaces.CenterFiniteDifferenceSpace(topology)
-    @test repr(space) == """
+    c_space = Spaces.CenterFiniteDifferenceSpace(topology)
+    f_space = Spaces.FaceFiniteDifferenceSpace(topology)
+    @test repr(c_space) == """
     CenterFiniteDifferenceSpace:
       context: SingletonCommsContext using CPUSingleThreaded
       mesh: 1-element IntervalMesh of IntervalDomain: z ∈ [0.0,5.0] (:bottom, :top)"""
 
-    coord_data = Spaces.coordinates_data(space)
-    point_space = Spaces.level(space, 1)
+    @test f_space == Spaces.face_space(f_space)
+    @test c_space == Spaces.center_space(f_space)
+    @test f_space == Spaces.face_space(c_space)
+    @test c_space == Spaces.center_space(c_space)
+
+    coord_data = Spaces.coordinates_data(c_space)
+    point_space = Spaces.level(c_space, 1)
     @test point_space isa Spaces.PointSpace
     @test Spaces.coordinates_data(point_space)[] ==
           Spaces.level(coord_data, 1)[]
 
-    @test Spaces.local_geometry_type(typeof(space)) <: Geometry.LocalGeometry
+    @test Spaces.local_geometry_type(typeof(c_space)) <: Geometry.LocalGeometry
 
     x_max = FT(1)
     y_max = FT(1)
@@ -185,12 +197,12 @@ end
     @test length(Spaces.unique_nodes(hspace)) == 4
     @test length(Spaces.all_nodes(hspace)) == 4
 
-    if on_gpu
-        adapted_space = adapt(space)(space)
+    @static if on_gpu
+        adapted_space = adapt(CUDA.KernelAdaptor(), c_space)
         @test ClimaComms.context(adapted_space) == DeviceSideContext()
         @test ClimaComms.device(adapted_space) == DeviceSideDevice()
 
-        adapted_hspace = adapt(hspace)(hspace)
+        adapted_hspace = adapt(CUDA.KernelAdaptor(), hspace)
         @test ClimaComms.context(adapted_hspace) == DeviceSideContext()
         @test ClimaComms.device(adapted_hspace) == DeviceSideDevice()
     end
@@ -232,8 +244,8 @@ end
     local_geometry_slab = slab(Spaces.local_geometry_data(space), 1)
     dss_weights_slab = slab(Spaces.local_dss_weights(space), 1)
 
-    if on_gpu
-        adapted_space = adapt(space)(space)
+    @static if on_gpu
+        adapted_space = adapt(CUDA.KernelAdaptor(), space)
         @test ClimaComms.context(adapted_space) == DeviceSideContext()
         @test ClimaComms.device(adapted_space) == DeviceSideDevice()
     end
