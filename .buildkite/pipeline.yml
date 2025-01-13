@@ -258,6 +258,7 @@ steps:
         key: unit_spaces
         command:
           - "julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/unit_spaces.jl"
+          - "julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/unit_high_res_space.jl"
           - "julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/opt_spaces.jl"
 
       - label: "Unit: cuda spaces"
@@ -266,6 +267,16 @@ steps:
           - "julia --project=.buildkite -e 'using CUDA; CUDA.versioninfo()'"
           - "srun julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/unit_spaces.jl"
           - "srun julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/opt_spaces.jl"
+        env:
+          CLIMACOMMS_DEVICE: "CUDA"
+        agents:
+          slurm_gpus: 1
+
+      - label: "Unit: cuda high res spaces"
+        key: "gpu_high_res_cuda_spaces"
+        command:
+          - julia --project=.buildkite -e 'using CUDA; CUDA.versioninfo()'
+          - julia --color=yes --check-bounds=yes --project=.buildkite test/Spaces/unit_high_res_space.jl
         env:
           CLIMACOMMS_DEVICE: "CUDA"
         agents:
